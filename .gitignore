@@ -1,0 +1,8 @@
+# Compiled binary
+/goem2a
+
+# Downloaded emoji image cache
+/images/
+
+# Generated ASCII PNGs
+*_ascii.png
