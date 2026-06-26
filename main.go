@@ -31,16 +31,26 @@ Optional the argument --png writes each result to a colored PNG image (implies -
 Optional the argument --bg <color> sets the PNG background: "transparent", a name (black), or #rrggbb (implies --png)`
 
 func main() {
-	args := os.Args[1:]
-	opts, emojiArgs, err := parseArgs(args)
-	if err != nil {
+	if err := run(os.Args[1:]); err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
 		os.Exit(1)
 	}
+}
 
+// run is the testable entry point: it returns an error instead of exiting so
+// the orchestration can be exercised without process control.
+func run(args []string) error {
+	if len(args) == 0 || args[0] == "-h" || args[0] == "--help" {
+		fmt.Println(usage)
+		return nil
+	}
+
+	opts, emojiArgs, err := parseArgs(args)
+	if err != nil {
+		return err
+	}
 	if err := createImageFolder(); err != nil {
-		fmt.Fprintln(os.Stderr, "Error:", err)
-		os.Exit(1)
+		return err
 	}
 
 	type result struct {
@@ -52,29 +62,25 @@ func main() {
 	for _, arg := range emojiArgs {
 		literal, err := resolveEmoji(arg)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error:", err)
-			os.Exit(1)
+			return err
 		}
 		unicode := codepointHex(literal)
 
 		fileName, err := extractEmoji(unicode)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error:", err)
-			os.Exit(1)
+			return err
 		}
 
 		ascii, err := emojiToASCII(fileName, opts)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error:", err)
-			os.Exit(1)
+			return err
 		}
 		results = append(results, result{literal, ascii})
 
 		if opts.png {
 			outPath := "./" + unicode + "_ascii.png"
 			if err := renderASCIIToPNG(ascii, outPath, opts.bg); err != nil {
-				fmt.Fprintln(os.Stderr, "Error:", err)
-				os.Exit(1)
+				return err
 			}
 			fmt.Printf("Wrote %s\n", outPath)
 		}
@@ -87,6 +93,7 @@ func main() {
 		fmt.Println(r.ascii)
 		fmt.Print("\n\n\n")
 	}
+	return nil
 }
 
 // parseArgs consumes the flag arguments and returns the remaining emoji
@@ -96,11 +103,6 @@ func parseArgs(args []string) (options, []string, error) {
 	opts := options{
 		jp2aBackground: "light",
 		bg:             background{fill: color.RGBA{255, 255, 255, 255}}, // white default
-	}
-
-	if len(args) == 0 || args[0] == "-h" || args[0] == "--help" {
-		fmt.Println(usage)
-		os.Exit(0)
 	}
 
 	var rest []string

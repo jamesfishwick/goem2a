@@ -90,29 +90,30 @@ func renderASCIIToPNG(asciiArt, outPath string, bg background) error {
 	}
 
 	drawer := &font.Drawer{Dst: img, Face: face}
+	// paintRun draws each rune of s into successive cells starting at col,
+	// returning the next free column.
+	paintRun := func(s string, col int, baseY fixed.Int26_6, c color.RGBA) int {
+		for _, ch := range s {
+			drawer.Src = &image.Uniform{c}
+			drawer.Dot = fixed.Point26_6{X: fixed.I(col * cellWidth), Y: baseY}
+			drawer.DrawString(string(ch))
+			col++
+		}
+		return col
+	}
+
 	for row, line := range lines {
 		col := 0
-		col2x := func() fixed.Int26_6 { return fixed.I(col * cellWidth) }
 		curColor := color.RGBA{0, 0, 0, 255}
 		baseY := fixed.I(row*cellHeight + ascent)
 		pos := 0
 		for _, loc := range ansiPattern.FindAllStringSubmatchIndex(line, -1) {
 			start, end, gStart, gEnd := loc[0], loc[1], loc[2], loc[3]
-			for _, ch := range line[pos:start] {
-				drawer.Src = &image.Uniform{curColor}
-				drawer.Dot = fixed.Point26_6{X: col2x(), Y: baseY}
-				drawer.DrawString(string(ch))
-				col++
-			}
+			col = paintRun(line[pos:start], col, baseY, curColor)
 			curColor = updateColor(curColor, line[gStart:gEnd])
 			pos = end
 		}
-		for _, ch := range line[pos:] {
-			drawer.Src = &image.Uniform{curColor}
-			drawer.Dot = fixed.Point26_6{X: col2x(), Y: baseY}
-			drawer.DrawString(string(ch))
-			col++
-		}
+		paintRun(line[pos:], col, baseY, curColor)
 	}
 
 	f, err := os.Create(outPath)

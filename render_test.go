@@ -39,10 +39,10 @@ func TestUpdateColor(t *testing.T) {
 	red := color.RGBA{255, 0, 0, 255}
 	black := color.RGBA{0, 0, 0, 255}
 	tests := []struct {
-		name    string
-		start   color.RGBA
-		codes   string
-		want    color.RGBA
+		name  string
+		start color.RGBA
+		codes string
+		want  color.RGBA
 	}{
 		{"reset to black", red, "0", black},
 		{"truecolor foreground", black, "38;2;12;34;56", color.RGBA{12, 34, 56, 255}},

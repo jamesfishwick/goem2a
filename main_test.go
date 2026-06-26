@@ -8,19 +8,19 @@ import (
 
 func TestParseArgs(t *testing.T) {
 	tests := []struct {
-		name        string
-		args        []string
-		wantColor   bool
-		wantMirror  bool
-		wantPNG     bool
-		wantBG      string // expected jp2aBackground; "" means don't check
-		wantRest    []string
-		wantErr     bool
+		name       string
+		args       []string
+		wantColor  bool
+		wantMirror bool
+		wantPNG    bool
+		wantBG     string // expected jp2aBackground; "" means don't check
+		wantRest   []string
+		wantErr    bool
 	}{
 		{
-			name:      "plain emoji",
-			args:      []string{"\U0001F525"},
-			wantRest:  []string{"\U0001F525"},
+			name:     "plain emoji",
+			args:     []string{"\U0001F525"},
+			wantRest: []string{"\U0001F525"},
 		},
 		{
 			name:      "color flag",
@@ -29,10 +29,10 @@ func TestParseArgs(t *testing.T) {
 			wantRest:  []string{":smile:"},
 		},
 		{
-			name:      "mirror flag",
-			args:      []string{"--mirror", "x"},
+			name:       "mirror flag",
+			args:       []string{"--mirror", "x"},
 			wantMirror: true,
-			wantRest:  []string{"x"},
+			wantRest:   []string{"x"},
 		},
 		{
 			name:      "png implies color",
@@ -58,10 +58,10 @@ func TestParseArgs(t *testing.T) {
 			wantRest:  []string{"x"},
 		},
 		{
-			name:     "multiple emojis preserved in order",
-			args:     []string{"a", "--color", "b"},
+			name:      "multiple emojis preserved in order",
+			args:      []string{"a", "--color", "b"},
 			wantColor: true,
-			wantRest: []string{"a", "b"},
+			wantRest:  []string{"a", "b"},
 		},
 		{
 			name:    "bg without value errors",
@@ -124,6 +124,34 @@ func TestParseArgsDefaults(t *testing.T) {
 	}
 	if opts.bg.fill != (color.RGBA{255, 255, 255, 255}) {
 		t.Errorf("default fill = %v, want white", opts.bg.fill)
+	}
+}
+
+// run's early-exit paths must not touch the network or jp2a: --help prints and
+// succeeds, and a bad flag returns an error before any download.
+func TestRunEarlyExits(t *testing.T) {
+	tests := []struct {
+		name    string
+		args    []string
+		wantErr bool
+	}{
+		{"no args prints usage", nil, false},
+		{"-h prints usage", []string{"-h"}, false},
+		{"--help prints usage", []string{"--help"}, false},
+		{"missing --bg value errors", []string{"--bg"}, true},
+		{"unknown bg color errors", []string{"--bg", "purplish", "x"}, true},
+		{"no emoji args errors", []string{"--color"}, true},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			err := run(tc.args)
+			if tc.wantErr && err == nil {
+				t.Errorf("run(%v) = nil, want error", tc.args)
+			}
+			if !tc.wantErr && err != nil {
+				t.Errorf("run(%v) = %v, want nil", tc.args, err)
+			}
+		})
 	}
 }
 
