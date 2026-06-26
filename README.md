@@ -1,8 +1,11 @@
 # goem2a - Emoji to ASCII art (Go)
 
-A Go port of [pyem2a](https://github.com/jamesfishwick/pyem2a), itself inspired
-by [em2a](https://github.com/zmwangx/em2a) by
-[zmwangx](https://github.com/zmwangx).
+A Go port of [pyem2a](https://github.com/JSchmiegel/pyem2a) by
+[@JSchmiegel](https://github.com/JSchmiegel), itself inspired by
+[em2a](https://github.com/zmwangx/em2a) by
+[@zmwangx](https://github.com/zmwangx). This port was made from
+[my fork](https://github.com/jamesfishwick/pyem2a), which adds the
+multi-codepoint emoji fix. See [Credits and license](#credits-and-license).
 
 Compared to the Python version, the only external runtime dependency is `jp2a`.
 Emoji-alias resolution ([`kyokomi/emoji`](https://github.com/kyokomi/emoji)) and
@@ -75,5 +78,20 @@ resolution, codepoint hashing, ANSI parsing, PNG rasterization) and the
 emoji-download fallback via an in-process HTTP server, so the suite needs no
 network access or `jp2a` binary. Source documentation is available via
 `go doc` (e.g. `go doc .`).
+
+## Credits and license
+
+`goem2a` exists thanks to the projects it descends from:
+
+- **[em2a](https://github.com/zmwangx/em2a)** by
+  [@zmwangx](https://github.com/zmwangx) — the original emoji-to-ASCII tool that
+  started the idea (MIT License).
+- **[pyem2a](https://github.com/JSchmiegel/pyem2a)** by
+  [@JSchmiegel](https://github.com/JSchmiegel) — the Python implementation this
+  is a direct port of (GNU GPL v2.0).
+
+Because `goem2a` is a derivative work of pyem2a, it inherits pyem2a's license:
+the **GNU General Public License v2.0**. See [LICENSE](./LICENSE) for the full
+text.
 
 [1]: https://www.webpagefx.com/tools/emoji-cheat-sheet/
