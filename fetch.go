@@ -9,7 +9,9 @@ import (
 	"strings"
 )
 
-const emojiCDN = "https://emoji.aranja.com/static/emoji-data/img-apple-160/"
+// emojiCDN is the base URL for Apple-style emoji PNGs. It is a var (not a
+// const) so tests can point it at a local server.
+var emojiCDN = "https://emoji.aranja.com/static/emoji-data/img-apple-160/"
 
 // extractEmoji ensures the emoji PNG for the given codepoint sequence exists in
 // ./images, downloading it if needed, and returns the local file path.
