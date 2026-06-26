@@ -60,4 +60,20 @@ leaving it nearly blank.
 1. Optionally parse jp2a's ANSI SGR codes and redraw the art into a PNG with an
    embedded monospace font.
 
+## Development
+
+```sh
+go build ./...        # compile
+go test ./...         # run the test suite
+go test -cover ./...  # with coverage
+go vet ./...          # static checks
+gofmt -l .            # list unformatted files (should be empty)
+```
+
+The tests cover the pure logic (argument parsing, color/luminance, alias
+resolution, codepoint hashing, ANSI parsing, PNG rasterization) and the
+emoji-download fallback via an in-process HTTP server, so the suite needs no
+network access or `jp2a` binary. Source documentation is available via
+`go doc` (e.g. `go doc .`).
+
 [1]: https://www.webpagefx.com/tools/emoji-cheat-sheet/
