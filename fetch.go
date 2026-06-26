@@ -7,11 +7,16 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // emojiCDN is the base URL for Apple-style emoji PNGs. It is a var (not a
 // const) so tests can point it at a local server.
 var emojiCDN = "https://emoji.aranja.com/static/emoji-data/img-apple-160/"
+
+// httpClient bounds CDN fetches so a stalled connection can't hang the CLI
+// indefinitely.
+var httpClient = &http.Client{Timeout: 15 * time.Second}
 
 // extractEmoji ensures the emoji PNG for the given codepoint sequence exists in
 // ./images, downloading it if needed, and returns the local file path.
@@ -41,7 +46,7 @@ func extractEmoji(unicode string) (string, error) {
 // download fetches url into dest, removing any partial file on failure so a
 // later candidate isn't masked by an empty file.
 func download(url, dest string) error {
-	resp, err := http.Get(url)
+	resp, err := httpClient.Get(url)
 	if err != nil {
 		return err
 	}

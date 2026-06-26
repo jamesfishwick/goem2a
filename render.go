@@ -120,8 +120,13 @@ func renderASCIIToPNG(asciiArt, outPath string, bg background) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	return png.Encode(f, img)
+	// Check Close explicitly: png.Encode can succeed while the final flush on
+	// Close fails, which would otherwise report a truncated PNG as success.
+	if err := png.Encode(f, img); err != nil {
+		f.Close()
+		return err
+	}
+	return f.Close()
 }
 
 func newMonoFace(size float64) (font.Face, error) {
